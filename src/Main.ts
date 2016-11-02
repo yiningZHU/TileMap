@@ -131,7 +131,16 @@ class Main extends egret.DisplayObjectContainer
 
          var player = new Player();
          player.Idle();
+         this.stage.addEventListener(egret.TouchEvent.TOUCH_TAP,(evt:egret.TouchEvent)=>
+         {
+             player.move(evt.stageX,evt.stageY);
+         },this);
+
          this.addChild(player);
+    }
+
+     private changeDescription(textfield: egret.TextField, textFlow: Array<egret.ITextElement>): void {
+        textfield.textFlow = textFlow;
     }
 
 }

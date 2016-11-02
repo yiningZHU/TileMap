@@ -26,7 +26,7 @@ class Player extends egret.DisplayObjectContainer
 
     }
 
-    /*public move(targetX: number, targetY: number) 
+    public move(targetX: number, targetY: number) 
     {
         egret.Tween.removeTweens(this._people);
         if (targetX > this._people.x) 
@@ -34,19 +34,29 @@ class Player extends egret.DisplayObjectContainer
             this._people.skewY = 180;
         }
         else { this._people.skewY = 0; }
-        this._stateMachine.setState(new PlayerIdleState(this));
+
+        this._stateMachine.setState(new PlayerWalkState(this));
 
         egret.Tween.get(this._people).to({ x: targetX, y: targetY }, 2000).call( function(){this.idle()} ,this);
     
-    }*/
+    }
+
     public Walk()
     {
-
+        var list = ["walk1_png", "walk2_png"];
+        var count = -1;
+        egret.Ticker.getInstance().register(() => {
+            count = count + 0.2;
+            if (count >= list.length) {
+                count = 0;
+            }
+            this._people.texture = RES.getRes(list[Math.floor(count)]);
+        }, this);
     }
 
     public Idle()
     {
-        var IdleList = ["1_png","2_png","3_png","4_png"];
+        var IdleList = ["Idle1_png","Idle2_png"];
         var count = -1;
         egret.Ticker.getInstance().register(() => {
             count = count + 0.06;
@@ -130,7 +140,31 @@ class PlayerIdleState extends PlayerState
 class StateMachine 
 {
     CurrentState: State;
+    constructor()
+    {
 
+    }
+/*
+    onRun()
+    {
+        this.CurrentState.onEnter;
+    }
+
+    onCheck(e: State)
+    {
+        if (this.CurrentState == e) 
+        {
+            this.CurrentState = this.CurrentState;
+        }
+
+        else
+        {
+            this.CurrentState.onExit;
+            this.CurrentState = e;
+            //return e;
+        }
+        
+    }*/
     setState(e: State) 
     {
 
@@ -138,9 +172,11 @@ class StateMachine
         {
             this.CurrentState.onExit();
         }
-
-        this.CurrentState = e;
+        else
+        {this.CurrentState = e;}
         e.onEnter();
     }
+
+   
 
 }

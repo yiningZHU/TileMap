@@ -124,4 +124,3 @@ var Tile = (function (_super) {
     return Tile;
 }(egret.DisplayObjectContainer));
 egret.registerClass(Tile,'Tile');
-//# sourceMappingURL=TileMap.js.map

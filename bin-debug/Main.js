@@ -105,9 +105,14 @@ var Main = (function (_super) {
         this.addChild(grid);
         var player = new Player();
         player.Idle();
+        this.stage.addEventListener(egret.TouchEvent.TOUCH_TAP, function (evt) {
+            player.move(evt.stageX, evt.stageY);
+        }, this);
         this.addChild(player);
+    };
+    p.changeDescription = function (textfield, textFlow) {
+        textfield.textFlow = textFlow;
     };
     return Main;
 }(egret.DisplayObjectContainer));
 egret.registerClass(Main,'Main');
-//# sourceMappingURL=Main.js.map

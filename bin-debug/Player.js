@@ -14,24 +14,32 @@ var Player = (function (_super) {
         this._ifIdle = true;
         this._ifWalk = false;
     };
-    /*public move(targetX: number, targetY: number)
-    {
+    p.move = function (targetX, targetY) {
         egret.Tween.removeTweens(this._people);
-        if (targetX > this._people.x)
-        {
+        if (targetX > this._people.x) {
             this._people.skewY = 180;
         }
-        else { this._people.skewY = 0; }
-        this._stateMachine.setState(new PlayerIdleState(this));
-
-        egret.Tween.get(this._people).to({ x: targetX, y: targetY }, 2000).call( function(){this.idle()} ,this);
-    
-    }*/
+        else {
+            this._people.skewY = 0;
+        }
+        this._stateMachine.setState(new PlayerWalkState(this));
+        egret.Tween.get(this._people).to({ x: targetX, y: targetY }, 2000).call(function () { this.idle(); }, this);
+    };
     p.Walk = function () {
+        var _this = this;
+        var list = ["walk1_png", "walk2_png"];
+        var count = -1;
+        egret.Ticker.getInstance().register(function () {
+            count = count + 0.2;
+            if (count >= list.length) {
+                count = 0;
+            }
+            _this._people.texture = RES.getRes(list[Math.floor(count)]);
+        }, this);
     };
     p.Idle = function () {
         var _this = this;
-        var IdleList = ["1_png", "2_png", "3_png", "4_png"];
+        var IdleList = ["Idle1_png", "Idle2_png"];
         var count = -1;
         egret.Ticker.getInstance().register(function () {
             count = count + 0.06;
@@ -92,14 +100,36 @@ var StateMachine = (function () {
     function StateMachine() {
     }
     var d = __define,c=StateMachine,p=c.prototype;
+    /*
+        onRun()
+        {
+            this.CurrentState.onEnter;
+        }
+    
+        onCheck(e: State)
+        {
+            if (this.CurrentState == e)
+            {
+                this.CurrentState = this.CurrentState;
+            }
+    
+            else
+            {
+                this.CurrentState.onExit;
+                this.CurrentState = e;
+                //return e;
+            }
+            
+        }*/
     p.setState = function (e) {
         if (this.CurrentState != null) {
             this.CurrentState.onExit();
         }
-        this.CurrentState = e;
+        else {
+            this.CurrentState = e;
+        }
         e.onEnter();
     };
     return StateMachine;
 }());
 egret.registerClass(StateMachine,'StateMachine');
-//# sourceMappingURL=Player.js.map
