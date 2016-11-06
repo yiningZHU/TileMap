@@ -13,8 +13,10 @@ var AStar = (function () {
         this._grid = grid;
         this._open = new Array();
         this._close = new Array();
+        //赋予起始点
         this._startNode = grid._startNode;
         this._endNode = grid._endNode;
+        //起始点的特定代价为零
         this._startNode.g = 0;
         this._startNode.h = this._heuristic(this._startNode);
         this._startNode.f = this._startNode.g + this._startNode.h;
@@ -23,9 +25,11 @@ var AStar = (function () {
     p.search = function () {
         var node = this._startNode;
         while (node != this._endNode) {
+            //开始检查当前节点周围的点
+            //start为为什么：
             var startX = Math.max(0, node.x - 1);
-            var endX = Math.min(this._grid._Column - 1, node.x + 1);
             var startY = Math.max(0, node.y - 1);
+            var endX = Math.min(this._grid._Column - 1, node.x + 1);
             var endY = Math.min(this._grid._Raw - 1, node.y + 1);
             for (var i = startX; i <= endX; i++) {
                 for (var j = startY; j <= endY; j++) {
@@ -103,6 +107,7 @@ var AStar = (function () {
         var dy = node.y - this._endNode.y;
         return Math.sqrt(dx * dx + dy * dy) * this._straightCost;
     };
+    //
     p.diagonal = function (node) {
         var dx = Math.abs(node.x - this._endNode.x);
         var dy = Math.abs(node.y - this._endNode.y);

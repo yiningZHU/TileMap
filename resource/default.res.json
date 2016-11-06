@@ -1,7 +1,7 @@
 {
 	"groups": [
 		{
-			"keys": "bg_jpg,egret_icon_png,description_json,1_png,2_png,3_png,4_png,box_jpg,road_jpg,Idle1_png,Idle2_png,walk1_png,walk2_png",
+			"keys": "bg_jpg,egret_icon_png,description_json,1_png,2_png,3_png,4_png,box_jpg,road_jpg,Idle2_png,walk1_png,walk2_png,Idle1_png",
 			"name": "preload"
 		}
 	],
@@ -52,11 +52,6 @@
 			"url": "assets/road.jpg"
 		},
 		{
-			"name": "Idle1_png",
-			"type": "image",
-			"url": "assets/Idle1.png"
-		},
-		{
 			"name": "Idle2_png",
 			"type": "image",
 			"url": "assets/Idle2.png"
@@ -70,6 +65,11 @@
 			"name": "walk2_png",
 			"type": "image",
 			"url": "assets/walk2.png"
+		},
+		{
+			"name": "Idle1_png",
+			"type": "image",
+			"url": "assets/Idle1.png"
 		}
 	]
 }

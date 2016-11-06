@@ -7,9 +7,10 @@ class AStar
     _startNode:TNode;
     _endNode:TNode;
     _path:TNode[] = [];
-    _heuristic:Function = this.diagonal;
-    _straightCost:number = 1.0;
-    _diagCost:number = Math.SQRT2;
+    _heuristic:Function = this.diagonal;//有三个预估函数
+    //相当于设置两个常量1和1.41
+    _straightCost:number = 1.0;//［？］：是1还不是很清楚它的作用－》明白了
+    _diagCost:number = Math.SQRT2;//2的平方根：1.41
 
     constructor()
     {
@@ -22,9 +23,11 @@ class AStar
         this._open = new Array();
         this._close = new Array();
 
+        //赋予起始点
         this._startNode = grid._startNode;
         this._endNode = grid._endNode;
 
+        //起始点的特定代价为零
         this._startNode.g = 0;
         this._startNode.h = this._heuristic(this._startNode);
         this._startNode.f = this._startNode.g + this._startNode.h;
@@ -38,25 +41,38 @@ class AStar
         var node:TNode = this._startNode;
         while(node!=this._endNode)
         {
+            //开始检查当前节点周围的点
+            //start为什么是这个参数？：因为不知道当前节点是否在地图的边缘，取当前节点
+            //减去1和0比较大的一个；若在边缘，则会丛0开始；如果不在边缘，则从当前节点
+            //前一个开始检查
             var startX:number = Math.max(0,node.x-1);
-            var endX:number = Math.min(this._grid._Column-1,node.x+1);
             var startY:number = Math.max(0,node.y-1);
+            //同理，因为不知道是否在地图的边缘处
+            var endX:number = Math.min(this._grid._Column-1,node.x+1);
             var endY:number = Math.min(this._grid._Raw-1,node.y+1);
 
+            //开始查找最佳路径
             for(var i = startX ; i<= endX ; i++)
             {
                 for(var j = startY ; j <= endY ; j++)
                 {
                     var test:TNode = this._grid.getTNode(i,j);
+
+                    //当前节点如果和测试节点相同则无视这个节点
                     if(test == node || test.walkable) continue
                     var cost:number = this._straightCost;
+
+                    //只要检测的节点和当前节点处在相同的X或者Y轴
+                    //那么它的代价就是1；否则就求他的对角代价
                     if(!((node.x == test.x) || (node.y == test.y)))
                     {
                         cost = this._diagCost;
                     }
+
                     var g:number = node.g + cost;
                     var h:number = this._heuristic(test);
                     var f:number = g+h;
+
                     if(this.isOpen(test) || this.isClosed(test))
                     {
                         if(test.f > f)
@@ -104,6 +120,7 @@ class AStar
         }
     }
 
+    //［稍微有点不懂］遍历已查列表
     public isOpen(node:TNode):boolean
     {
         for(var i=0; i<this._open.length;i++)
@@ -142,6 +159,7 @@ class AStar
         return Math.sqrt(dx * dx + dy * dy)*this._straightCost;
     }
 
+    //
     private diagonal(node:TNode):number
     {
         var dx:number = Math.abs(node.x - this._endNode.x);
