@@ -111,6 +111,9 @@ var Main = (function (_super) {
         //},this);
         this.addChild(player);
         player.activate();
+        this.stage.addEventListener(egret.TouchEvent.TOUCH_TAP, function (evt) {
+            player.move(evt.stageX, evt.stageY);
+        }, this);
     };
     p.changeDescription = function (textfield, textFlow) {
         textfield.textFlow = textFlow;
