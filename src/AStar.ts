@@ -73,6 +73,7 @@ class AStar
                     var h:number = this._heuristic(test);
                     var f:number = g+h;
 
+                    //测试节点在待查和已查列表中，检查当前节点的代价和测试节点的代价
                     if(this.isOpen(test) || this.isClosed(test))
                     {
                         if(test.f > f)
@@ -133,6 +134,7 @@ class AStar
         return false;
     }
 
+    //［］遍历待查列表
     public isClosed(node:TNode):boolean
     {
         for(var i = 0; i <this._close.length;i++)
