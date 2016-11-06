@@ -125,23 +125,47 @@ class Main extends egret.DisplayObjectContainer
      */
     private createGameMap():void
     {
-        
-         var grid = new TileMap();
-         this.addChild(grid);
-
          var player = new Player();
-         player.Idle();
-         this.stage.addEventListener(egret.TouchEvent.TOUCH_TAP,(evt:egret.TouchEvent)=>
-         {
-             player.move(evt.stageX,evt.stageY);
-         },this);
+         var Map = new TileMap(player);
+         this.addChild(Map);
+         //player.Idle();
+         //this.stage.addEventListener(egret.TouchEvent.TOUCH_TAP,(evt:egret.TouchEvent)=>
+         //{
+           //  player.move(evt.stageX,evt.stageY);
+         //},this);
 
          this.addChild(player);
+         player.activate();
     }
 
      private changeDescription(textfield: egret.TextField, textFlow: Array<egret.ITextElement>): void {
         textfield.textFlow = textFlow;
     }
+
+    protected load(callback: Function): void {
+        var count: number = 0;
+        var self = this;
+
+        var check = function () {
+            count++;
+            if (count == 2) {
+                callback.call(self);
+            }
+        }
+
+        var loader = new egret.URLLoader();
+        loader.addEventListener(egret.Event.COMPLETE, function loadOver(e) {
+            var loader = e.currentTarget;
+
+            this._mcData = JSON.parse(loader.data);
+
+            check();
+        }, this);
+        loader.dataFormat = egret.URLLoaderDataFormat.TEXT;
+        var request = new egret.URLRequest("resource/assets/mc/animation.json");
+        loader.load(request);
+    }
+
 
 }
 

@@ -6,6 +6,7 @@ class Player extends egret.DisplayObjectContainer
     _ifWalk:boolean;
     _ifIdle:boolean;
     _stateMachine:StateMachine;
+    _i:number = 0;
 
     public constructor()
     {
@@ -20,10 +21,20 @@ class Player extends egret.DisplayObjectContainer
         var _texture:egret.Texture = RES.getRes("1_png");
         this._people.texture = _texture;
         this.addChild(this._people);
+        this._stateMachine = new StateMachine();
+
+        this._people.x=32;
+        this._people.y=32;
 
         this._ifIdle = true;
         this._ifWalk = false;
 
+
+    }
+
+    public activate()
+    {
+        this._stateMachine.setState(new PlayerIdleState(this));
     }
 
     public move(targetX: number, targetY: number) 
@@ -37,7 +48,7 @@ class Player extends egret.DisplayObjectContainer
 
         this._stateMachine.setState(new PlayerWalkState(this));
 
-        egret.Tween.get(this._people).to({ x: targetX, y: targetY }, 2000).call( function(){this.idle()} ,this);
+        //egret.Tween.get(this._people).to({ x: targetX, y: targetY }, 2000).call( function(){this.idle()} ,this);
     
     }
 

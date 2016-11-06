@@ -3,6 +3,7 @@ var Player = (function (_super) {
     __extends(Player, _super);
     function Player() {
         _super.call(this);
+        this._i = 0;
         this.iniit();
     }
     var d = __define,c=Player,p=c.prototype;
@@ -11,8 +12,14 @@ var Player = (function (_super) {
         var _texture = RES.getRes("1_png");
         this._people.texture = _texture;
         this.addChild(this._people);
+        this._stateMachine = new StateMachine();
+        this._people.x = 32;
+        this._people.y = 32;
         this._ifIdle = true;
         this._ifWalk = false;
+    };
+    p.activate = function () {
+        this._stateMachine.setState(new PlayerIdleState(this));
     };
     p.move = function (targetX, targetY) {
         egret.Tween.removeTweens(this._people);
@@ -23,7 +30,7 @@ var Player = (function (_super) {
             this._people.skewY = 0;
         }
         this._stateMachine.setState(new PlayerWalkState(this));
-        egret.Tween.get(this._people).to({ x: targetX, y: targetY }, 2000).call(function () { this.idle(); }, this);
+        //egret.Tween.get(this._people).to({ x: targetX, y: targetY }, 2000).call( function(){this.idle()} ,this);
     };
     p.Walk = function () {
         var _this = this;

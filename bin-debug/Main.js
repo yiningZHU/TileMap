@@ -101,17 +101,38 @@ var Main = (function (_super) {
      * Create a game scene
      */
     p.createGameMap = function () {
-        var grid = new TileMap();
-        this.addChild(grid);
         var player = new Player();
-        player.Idle();
-        this.stage.addEventListener(egret.TouchEvent.TOUCH_TAP, function (evt) {
-            player.move(evt.stageX, evt.stageY);
-        }, this);
+        var Map = new TileMap(player);
+        this.addChild(Map);
+        //player.Idle();
+        //this.stage.addEventListener(egret.TouchEvent.TOUCH_TAP,(evt:egret.TouchEvent)=>
+        //{
+        //  player.move(evt.stageX,evt.stageY);
+        //},this);
         this.addChild(player);
+        player.activate();
     };
     p.changeDescription = function (textfield, textFlow) {
         textfield.textFlow = textFlow;
+    };
+    p.load = function (callback) {
+        var count = 0;
+        var self = this;
+        var check = function () {
+            count++;
+            if (count == 2) {
+                callback.call(self);
+            }
+        };
+        var loader = new egret.URLLoader();
+        loader.addEventListener(egret.Event.COMPLETE, function loadOver(e) {
+            var loader = e.currentTarget;
+            this._mcData = JSON.parse(loader.data);
+            check();
+        }, this);
+        loader.dataFormat = egret.URLLoaderDataFormat.TEXT;
+        var request = new egret.URLRequest("resource/assets/mc/animation.json");
+        loader.load(request);
     };
     return Main;
 }(egret.DisplayObjectContainer));
