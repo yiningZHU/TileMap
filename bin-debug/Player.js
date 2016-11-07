@@ -13,8 +13,8 @@ var Player = (function (_super) {
         this._people.texture = _texture;
         this.addChild(this._people);
         this._stateMachine = new StateMachine();
-        this._people.x = 32;
-        this._people.y = 32;
+        this._people.x = 0;
+        this._people.y = 0;
         this._ifIdle = true;
         this._ifWalk = false;
     };
@@ -140,3 +140,4 @@ var StateMachine = (function () {
     return StateMachine;
 }());
 egret.registerClass(StateMachine,'StateMachine');
+//# sourceMappingURL=Player.js.map

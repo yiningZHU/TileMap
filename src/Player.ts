@@ -23,13 +23,12 @@ class Player extends egret.DisplayObjectContainer
         this.addChild(this._people);
         this._stateMachine = new StateMachine();
 
-        this._people.x=32;
-        this._people.y=32;
+        this._people.x=0;
+        this._people.y=0;
 
         this._ifIdle = true;
         this._ifWalk = false;
-
-
+        
     }
 
     public activate()

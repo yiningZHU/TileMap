@@ -146,13 +146,16 @@ class Main extends egret.DisplayObjectContainer
         textfield.textFlow = textFlow;
     }
 
-    protected load(callback: Function): void {
+    protected load(callback: Function): void 
+    {
         var count: number = 0;
         var self = this;
 
-        var check = function () {
+        var check = function () 
+        {
             count++;
-            if (count == 2) {
+            if (count == 2) 
+            {
                 callback.call(self);
             }
         }

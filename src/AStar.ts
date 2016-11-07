@@ -38,18 +38,18 @@ class AStar
     public search():boolean
     {
         
-        var node:TNode = this._startNode;
-        while(node!=this._endNode)
+        var nownode:TNode = this._startNode;
+        while(nownode!=this._endNode)
         {
             //开始检查当前节点周围的点
             //start为什么是这个参数？：因为不知道当前节点是否在地图的边缘，取当前节点
             //减去1和0比较大的一个；若在边缘，则会丛0开始；如果不在边缘，则从当前节点
             //前一个开始检查
-            var startX:number = Math.max(0,node.x-1);
-            var startY:number = Math.max(0,node.y-1);
+            var startX:number = Math.max(0,nownode.x-1);
+            var startY:number = Math.max(0,nownode.y-1);
             //同理，因为不知道是否在地图的边缘处
-            var endX:number = Math.min(this._grid._Column-1,node.x+1);
-            var endY:number = Math.min(this._grid._Raw-1,node.y+1);
+            var endX:number = Math.min(this._grid._Column-1,nownode.x+1);
+            var endY:number = Math.min(this._grid._Raw-1,nownode.y+1);
 
             //开始查找最佳路径
             for(var i = startX ; i<= endX ; i++)
@@ -59,17 +59,17 @@ class AStar
                     var test:TNode = this._grid.getTNode(i,j);
 
                     //当前节点如果和测试节点相同则无视这个节点
-                    if(test == node || test.walkable) continue
+                    if(test == nownode || test.walkable) continue
                     var cost:number = this._straightCost;
 
                     //只要检测的节点和当前节点处在相同的X或者Y轴
                     //那么它的代价就是1；否则就求他的对角代价
-                    if(!((node.x == test.x) || (node.y == test.y)))
+                    if(!((nownode.x == test.x) || (nownode.y == test.y)))
                     {
                         cost = this._diagCost;
                     }
 
-                    var g:number = node.g + cost;
+                    var g:number = nownode.g + cost;
                     var h:number = this._heuristic(test);
                     var f:number = g+h;
 
@@ -81,9 +81,11 @@ class AStar
                             test.f = f;
                             test.g = g;
                             test.h = h;
-                            test.parent = node;
+                            test.parent = nownode;
                         }
                     }
+                    //不再列表中，则要将计算出来的代价赋给测试节点，并且将节点加到
+                    //待查列表中
                     else
                     {
                         test.f = f;
@@ -93,17 +95,20 @@ class AStar
                     }
                 }
             }
-            this._close.push(node);
+
+            //这样当前节点久检查完毕，加到已查列表中
+            this._close.push(nownode);
             if(this._open.length == 0)
             {
-                //trace("no path found!");
+                console.log("NO TRACE FOUND!");
                 return false;
             }
+            
             this._open.sort(function(a,b)//?
             {
                 return a.f-b.f;
             });
-            node = this._open.shift() as TNode;
+            nownode = this._open.shift() as TNode;
         }
             this.buildPath();
             return true;
@@ -121,10 +126,10 @@ class AStar
         }
     }
 
-    //［稍微有点不懂］遍历已查列表
+    //［稍微有点不懂］遍历待查列表
     public isOpen(node:TNode):boolean
     {
-        for(var i=0; i<this._open.length;i++)
+        for(var i = 0; i<this._open.length;i++)
         {
             if(this._open[i] == node)
             {
@@ -134,7 +139,7 @@ class AStar
         return false;
     }
 
-    //［］遍历待查列表
+    //［］遍历已查列表
     public isClosed(node:TNode):boolean
     {
         for(var i = 0; i <this._close.length;i++)
@@ -175,4 +180,15 @@ class AStar
     {
         return this._close.concat(this._open);
     }
+
+    public validNode(node: TNode, nownode: TNode): Boolean 
+    {
+		if ( nownode == node || !node.walkable) return false;
+
+		if (!this._grid._nodes[nownode.x][node.y].walkable) return false;
+
+		if (!this._grid._nodes[node.x][nownode.y].walkable) return false;
+
+		return true;
+	}
 }

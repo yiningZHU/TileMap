@@ -22,10 +22,10 @@ var TileMap = (function (_super) {
             { x: 0, y: 6, walkable: true, image: "road_jpg" },
             { x: 0, y: 7, walkable: true, image: "road_jpg" },
             { x: 0, y: 8, walkable: true, image: "road_jpg" },
-            { x: 1, y: 0, walkable: true, image: "box_jpg" },
-            { x: 1, y: 1, walkable: true, image: "box_jpg" },
-            { x: 1, y: 2, walkable: true, image: "box_jpg" },
-            { x: 1, y: 3, walkable: true, image: "box_jpg" },
+            { x: 1, y: 0, walkable: false, image: "box_jpg" },
+            { x: 1, y: 1, walkable: false, image: "box_jpg" },
+            { x: 1, y: 2, walkable: false, image: "box_jpg" },
+            { x: 1, y: 3, walkable: false, image: "box_jpg" },
             { x: 1, y: 4, walkable: true, image: "road_jpg" },
             { x: 1, y: 5, walkable: true, image: "road_jpg" },
             { x: 1, y: 6, walkable: true, image: "road_jpg" },
@@ -79,8 +79,8 @@ var TileMap = (function (_super) {
             { x: 7, y: 0, walkable: true, image: "road_jpg" },
             { x: 7, y: 1, walkable: true, image: "road_jpg" },
             { x: 7, y: 2, walkable: true, image: "road_jpg" },
-            { x: 7, y: 3, walkable: true, image: "box_jpg" },
-            { x: 7, y: 4, walkable: true, image: "box_jpg" },
+            { x: 7, y: 3, walkable: false, image: "box_jpg" },
+            { x: 7, y: 4, walkable: false, image: "box_jpg" },
             { x: 7, y: 5, walkable: true, image: "road_jpg" },
             { x: 7, y: 6, walkable: true, image: "road_jpg" },
             { x: 7, y: 7, walkable: true, image: "road_jpg" },
@@ -160,3 +160,4 @@ var Tile = (function (_super) {
     return Tile;
 }(egret.DisplayObjectContainer));
 egret.registerClass(Tile,'Tile');
+//# sourceMappingURL=TileMap.js.map
