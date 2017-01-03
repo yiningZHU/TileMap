@@ -1,194 +1,167 @@
-// TypeScript file
 class AStar
 {
-    _open:TNode[] = [];
-    _close:TNode[] = [];
-    _grid:Grid;
-    _startNode:TNode;
-    _endNode:TNode;
-    _path:TNode[] = [];
-    _heuristic:Function = this.diagonal;//有三个预估函数
-    //相当于设置两个常量1和1.41
-    _straightCost:number = 1.0;//［？］：是1还不是很清楚它的作用－》明白了
-    _diagCost:number = Math.SQRT2;//2的平方根：1.41
+    private _openArray : Tile[];
+    private _closedArray : Tile[];
+    private _tileMap : TileMap;
+    public _startTile : Tile;
+    public _endTile : Tile;
+    public _pathArray : Tile[];
+    private _straightCost:number = 1.0;
+    private _diagCost:number = Math.SQRT2;
+    private _heuristic:Function = this.diagonal;
+    constructor(){};
 
-    constructor()
+    public findPath(tileMap : TileMap):any
     {
-
+          var h = 0;
+          var g = 0;
+          this._pathArray = [];
+          this._tileMap = tileMap;
+          this._openArray = [];
+          this._closedArray = [];
+          this._startTile = tileMap.startTile;
+          this._endTile = tileMap.endTile;
+          this._startTile.tileData.g = 0;
+          this._startTile.tileData.h = this._heuristic(this._startTile);
+          this._startTile.tileData.f = this._startTile.tileData.g + this._startTile.tileData.h;
+          return this.search();
     }
 
-    public findPath(grid:Grid):boolean
+    private isOpen(tile : Tile):any
     {
-        this._grid = grid;
-        this._open = new Array();
-        this._close = new Array();
-
-        //赋予起始点
-        this._startNode = grid._startNode;
-        this._endNode = grid._endNode;
-
-        //起始点的特定代价为零
-        this._startNode.g = 0;
-        this._startNode.h = this._heuristic(this._startNode);
-        this._startNode.f = this._startNode.g + this._startNode.h;
-
-        return this.search();
+        for(var i = 0 ; i < this._openArray.length ; i++){
+            if( tile == this._openArray[i] ){
+                return true;
+            }
+        }
+        return false;
     }
 
-    public search():boolean
+    private isClosed(tile : Tile):any
     {
-        
-        var nownode:TNode = this._startNode;
-        while(nownode!=this._endNode)
+        for(var i = 0 ; i < this._closedArray.length ; i++)
         {
-            //开始检查当前节点周围的点
-            //start为什么是这个参数？：因为不知道当前节点是否在地图的边缘，取当前节点
-            //减去1和0比较大的一个；若在边缘，则会丛0开始；如果不在边缘，则从当前节点
-            //前一个开始检查
-            var startX:number = Math.max(0,nownode.x-1);
-            var startY:number = Math.max(0,nownode.y-1);
-            //同理，因为不知道是否在地图的边缘处
-            var endX:number = Math.min(this._grid._Column-1,nownode.x+1);
-            var endY:number = Math.min(this._grid._Raw-1,nownode.y+1);
-
-            //开始查找最佳路径
-            for(var i = startX ; i<= endX ; i++)
+            if( tile == this._closedArray[i] )
             {
-                for(var j = startY ; j <= endY ; j++)
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private findMinFInOpenArray():any
+    {
+        var i = 0;
+        var temp : Tile;
+        for(var j = 0 ; j < this._openArray.length ; j++)
+        {
+            if( this._openArray[i].tileData.f > this._openArray[j].tileData.f)
+            {
+                i = j;
+            }
+        }
+        temp = this._openArray[i];
+        for( j = i ; j < this._openArray.length - 1; j++)
+        {
+            this._openArray[j] = this._openArray[j + 1];
+        }
+        this._openArray.pop();
+        return temp;
+    }
+
+    public search():any
+    {
+        var tile = this._startTile;
+        
+        while( tile != this._endTile)
+        {
+            var startX:number = Math.max(0, tile.tileData.x - 1);
+            var endX:number = Math.min(this._tileMap.MapCols - 1, tile.tileData.x + 1);
+            var startY:number = Math.max(0, tile.tileData.y - 1);
+            var endY:number = Math.min(this._tileMap.MapRows - 1, tile.tileData.y + 1);
+            for(var i:number = startX; i <= endX; i++)
+            {
+                for(var j:number = startY; j <= endY; j++)
                 {
-                    var test:TNode = this._grid.getTNode(i,j);
-
-                    //当前节点如果和测试节点相同则无视这个节点
-                    if(test == nownode || test.walkable) continue
+                    var test:Tile = this._tileMap.getTile(i, j);
+                    if(test == tile ||!test.tileData.walkable ||!this._tileMap.getTile(tile.tileData.x, test.tileData.y).tileData.walkable ||!this._tileMap.getTile(test.tileData.x, tile.tileData.y).tileData.walkable)
+                    {
+                        continue;
+                    }
                     var cost:number = this._straightCost;
-
-                    //只要检测的节点和当前节点处在相同的X或者Y轴
-                    //那么它的代价就是1；否则就求他的对角代价
-                    if(!((nownode.x == test.x) || (nownode.y == test.y)))
+                    if(!((tile.tileData.x == test.tileData.x) || (tile.tileData.y == test.tileData.y)))
                     {
                         cost = this._diagCost;
                     }
-
-                    var g:number = nownode.g + cost;
+                    var g:number = tile.tileData.g + cost * test.tileData.costMultiplier;
                     var h:number = this._heuristic(test);
-                    var f:number = g+h;
-
-                    //测试节点在待查和已查列表中，检查当前节点的代价和测试节点的代价
+                    var f:number = g + h;
                     if(this.isOpen(test) || this.isClosed(test))
                     {
-                        if(test.f > f)
-                        {
-                            test.f = f;
-                            test.g = g;
-                            test.h = h;
-                            test.parent = nownode;
+                       if(test.tileData.f > f)
+                       {
+                          test.tileData.f = f;
+                          test.tileData.g = g;
+                          test.tileData.h = h;
+                          test.tileParent = tile;
                         }
                     }
-                    //不再列表中，则要将计算出来的代价赋给测试节点，并且将节点加到
-                    //待查列表中
                     else
                     {
-                        test.f = f;
-                        test.g = g;
-                        test.h = h;
-                        this._open.push(test);
+                        test.tileData.f = f;
+                        test.tileData.g = g;
+                        test.tileData.h = h;
+                        test.tileParent = tile;
+                        this._openArray.push(test);
                     }
+
                 }
             }
-
-            //这样当前节点久检查完毕，加到已查列表中
-            this._close.push(nownode);
-            if(this._open.length == 0)
+            this._closedArray.push(tile);
+            if(this._openArray.length == 0)
             {
-                console.log("NO TRACE FOUND!");
-                return false;
+                console.log("no path found");
+                return false
             }
-            
-            this._open.sort(function(a,b)//?
-            {
-                return a.f-b.f;
-            });
-            nownode = this._open.shift() as TNode;
+            tile = this.findMinFInOpenArray();
         }
-            this.buildPath();
-            return true;
-    }
+        this.buildPath();
+        return true;
 
-    public buildPath():void
+    }
+    private buildPath():void
     {
-        this._path = new Array();
-        var node:TNode = this._endNode;
-        this._path.push(node);
-        while(node != this._startNode)
+    
+        var tile:Tile = this._endTile;
+        this._pathArray.push(tile);
+        while(tile != this._startTile)
         {
-            node = node.parent;
-            this._path.unshift(node);
+            tile = tile.tileParent;
+            this._pathArray.unshift(tile);
         }
     }
 
-    //［稍微有点不懂］遍历待查列表
-    public isOpen(node:TNode):boolean
+
+    private emanhattan(tile:Tile):number 
     {
-        for(var i = 0; i<this._open.length;i++)
-        {
-            if(this._open[i] == node)
-            {
-                return true;
-            }
-        }
-        return false;
+        return Math.abs(tile.x - this._endTile.tileData.x) * this._straightCost +
+        Math.abs(tile.y + this._endTile.tileData.y) * this._straightCost;
     }
 
-    //［］遍历已查列表
-    public isClosed(node:TNode):boolean
+    private euclidian(tile:Tile):number
     {
-        for(var i = 0; i <this._close.length;i++)
-        {
-            if(this._close[i] == node)
-            {
-                return true;
-            }
-        }
-        return false;
+        var dx:number = tile.x - this._endTile.tileData.x;
+        var dy:number = tile.y - this._endTile.tileData.y;
+        return Math.sqrt(dx * dx + dy * dy) * this._straightCost;
     }
 
-    private manhattan(node:TNode):number
+    private diagonal(tile:Tile):number
     {
-        return Math.abs(node.x - this._endNode.x)*this._straightCost
-        +
-        Math.abs(node.y + this._endNode.y)*this._straightCost;
-    }
-
-    private euclidian(node:TNode):number
-    {
-        var dx:number = node.x - this._endNode.x;
-        var dy:number = node.y - this._endNode.y;
-        return Math.sqrt(dx * dx + dy * dy)*this._straightCost;
-    }
-
-    //
-    private diagonal(node:TNode):number
-    {
-        var dx:number = Math.abs(node.x - this._endNode.x);
-        var dy:number = Math.abs(node.y - this._endNode.y);
-        var diag:number = Math.min(dx,dy);
+        var dx:number = Math.abs(tile.tileData.x - this._endTile.tileData.x);
+        var dy:number = Math.abs(tile.tileData.y - this._endTile.tileData.y);
+        var diag:number = Math.min(dx, dy);
         var straight:number = dx + dy;
-        return this._diagCost*diag + this._straightCost*(straight - 2*diag);
+        return this._diagCost * diag + this._straightCost * (straight - 2 * diag);
     }
 
-    public visited():TNode[]
-    {
-        return this._close.concat(this._open);
-    }
-
-    public validNode(node: TNode, nownode: TNode): Boolean 
-    {
-		if ( nownode == node || !node.walkable) return false;
-
-		if (!this._grid._nodes[nownode.x][node.y].walkable) return false;
-
-		if (!this._grid._nodes[node.x][nownode.y].walkable) return false;
-
-		return true;
-	}
 }

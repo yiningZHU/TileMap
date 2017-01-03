@@ -30,12 +30,20 @@ var Main = (function (_super) {
     __extends(Main, _super);
     function Main() {
         _super.call(this);
-        this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
+        //private textfield:egret.TextField;
+        this.People = new Player();
+        this.PreviousPoint = new egret.Point();
+        this.Goal = new egret.Point();
+        this.tileSize = 64;
+        this.ifFindWay = false;
+        this.currentPath = 0;
+        this.ifOnGoal = false;
+        this.ifStartMove = false;
+        this.movingTime = 32;
+        this.addEventListener(egret.Event.ADDED_TO_STAGE, this._onAddToStage, this);
     }
     var d = __define,c=Main,p=c.prototype;
-    p.onAddToStage = function (event) {
-        //设置加载进度界面
-        //Config to load process interface
+    p._onAddToStage = function (event) {
         this.loadingView = new LoadingUI();
         this.stage.addChild(this.loadingView);
         //初始化Resource资源加载库
@@ -66,7 +74,7 @@ var Main = (function (_super) {
             RES.removeEventListener(RES.ResourceEvent.GROUP_LOAD_ERROR, this.onResourceLoadError, this);
             RES.removeEventListener(RES.ResourceEvent.GROUP_PROGRESS, this.onResourceProgress, this);
             RES.removeEventListener(RES.ResourceEvent.ITEM_LOAD_ERROR, this.onItemLoadError, this);
-            this.createGameMap();
+            this.createGameScene();
         }
     };
     /**
@@ -96,46 +104,182 @@ var Main = (function (_super) {
             this.loadingView.setProgress(event.itemsLoaded, event.itemsTotal);
         }
     };
-    /**
-     * 创建游戏场景
-     * Create a game scene
-     */
-    p.createGameMap = function () {
-        var player = new Player();
-        var Map = new TileMap(player);
-        this.addChild(Map);
-        //player.Idle();
-        //this.stage.addEventListener(egret.TouchEvent.TOUCH_TAP,(evt:egret.TouchEvent)=>
-        //{
-        //  player.move(evt.stageX,evt.stageY);
-        //},this);
-        this.addChild(player);
-        player.activate();
-        this.stage.addEventListener(egret.TouchEvent.TOUCH_TAP, function (evt) {
-            player.move(evt.stageX, evt.stageY);
-        }, this);
-    };
-    p.changeDescription = function (textfield, textFlow) {
-        textfield.textFlow = textFlow;
-    };
-    p.load = function (callback) {
-        var count = 0;
-        var self = this;
-        var check = function () {
-            count++;
-            if (count == 2) {
-                callback.call(self);
+    p.createGameScene = function () {
+        var _this = this;
+        //添网格地图
+        //var background:egret.Bitmap = this.createBitmapByName("background_png");
+        //this.addChild(background);
+        //background.width = 640;
+        //background.height = 480;
+        var stageW = this.stage.stageWidth;
+        var stageH = this.stage.stageHeight;
+        this.map_01 = new TileMap();
+        this.addChild(this.map_01);
+        //添加人物
+        var peoplepicture = this.createBitmapByName("characterfront_01_png");
+        this.People.SetPeopleBitmap(peoplepicture);
+        this.addChild(this.People.PeopleBitmap);
+        this.People.PeopleBitmap.height = 80;
+        this.People.PeopleBitmap.width = 80;
+        this.People.PeopleBitmap.x = 0;
+        this.People.PeopleBitmap.y = 0;
+        //设置起始点
+        this.map_01.setStartTile = this.map_01.getTile(0, 0);
+        this.map_01.endTile = this.map_01.getTile(0, 0);
+        this.astar = new AStar();
+        this.stage.addEventListener(egret.TouchEvent.TOUCH_BEGIN, function (e) {
+            //egret.Tween.removeTweens(this.People.PeopleBitmap);
+            _this.ifStartMove = true;
+            _this.playerX = Math.floor(_this.People.PeopleBitmap.x / _this.tileSize);
+            _this.playerY = Math.floor(_this.People.PeopleBitmap.y / _this.tileSize);
+            _this.playerBitX = _this.People.PeopleBitmap.x;
+            _this.playerBitY = _this.People.PeopleBitmap.y;
+            _this.map_01.startTile = _this.map_01.getTile(_this.playerX, _this.playerY);
+            _this.currentPath = 0;
+            _this.PreviousPoint.x = e.stageX;
+            _this.PreviousPoint.y = e.stageY;
+            _this.tileX = Math.floor(_this.PreviousPoint.x / _this.tileSize);
+            _this.tileY = Math.floor(_this.PreviousPoint.y / _this.tileSize);
+            _this.map_01.endTile = _this.map_01.getTile(_this.tileX, _this.tileY);
+            _this.ifFindWay = _this.astar.findPath(_this.map_01);
+            if (_this.ifFindWay) {
+                _this.People.SetState(new PeopleWalk(), _this);
+                _this.currentPath = 0;
             }
-        };
-        var loader = new egret.URLLoader();
-        loader.addEventListener(egret.Event.COMPLETE, function loadOver(e) {
-            var loader = e.currentTarget;
-            this._mcData = JSON.parse(loader.data);
-            check();
+            for (var i = 0; i < _this.astar._pathArray.length; i++) {
+                console.log(_this.astar._pathArray[i].x + " And " + _this.astar._pathArray[i].y);
+            }
+            if (_this.ifFindWay) {
+                _this.map_01.startTile = _this.map_01.endTile;
+            }
         }, this);
-        loader.dataFormat = egret.URLLoaderDataFormat.TEXT;
-        var request = new egret.URLRequest("resource/assets/mc/animation.json");
-        loader.load(request);
+        this.PeopleMove();
+        this.PeopleAnimation();
+    };
+    /**
+       * 根据name关键字创建一个Bitmap对象。name属性请参考resources/resource.json配置文件的内容。
+       * Create a Bitmap object according to name keyword.As for the property of name please refer to the configuration file of resources/resource.json.
+       */
+    p.createBitmapByName = function (name) {
+        var result = new egret.Bitmap();
+        var texture = RES.getRes(name);
+        result.texture = texture;
+        return result;
+    };
+    p.PeopleMove = function () {
+        var _this = this;
+        var self = this;
+        egret.Ticker.getInstance().register(function () {
+            if (_this.ifStartMove && self.ifFindWay) {
+                if (self.currentPath < self.astar._pathArray.length - 1) {
+                    var distanceX = self.astar._pathArray[self.currentPath + 1].x - self.astar._pathArray[self.currentPath].x;
+                    var distanceY = self.astar._pathArray[self.currentPath + 1].y - self.astar._pathArray[self.currentPath].y;
+                    if (distanceX > 0) {
+                        self.People.SetDirection(new PeopleWalkrightState(), self);
+                    }
+                    if (distanceX <= 0) {
+                        self.People.SetDirection(new PeopleWalkleftState(), self);
+                    }
+                    if (!self.IfOnGoal(self.astar._pathArray[self.currentPath + 1])) {
+                        self.People.PeopleBitmap.x += distanceX / self.movingTime;
+                        self.People.PeopleBitmap.y += distanceY / self.movingTime;
+                    }
+                    else {
+                        self.currentPath += 1;
+                    }
+                }
+            }
+            if (_this.ifStartMove && !self.ifFindWay) {
+                var distanceX = self.map_01.startTile.x - self.playerBitX;
+                var distanceY = self.map_01.startTile.y - self.playerBitY;
+                if (distanceX > 0) {
+                    self.People.SetDirection(new PeopleWalkrightState(), self);
+                }
+                if (distanceX <= 0) {
+                    self.People.SetDirection(new PeopleWalkleftState(), self);
+                }
+                if (!self.IfOnGoal(self.map_01.startTile)) {
+                    self.People.PeopleBitmap.x += distanceX / self.movingTime;
+                    self.People.PeopleBitmap.y += distanceY / self.movingTime;
+                }
+                else {
+                    self.People.SetState(new PeopleIdle(), self);
+                }
+            }
+        }, self);
+    };
+    p.IfOnGoal = function (tile) {
+        var self = this;
+        if (self.People.PeopleBitmap.x == tile.x && self.People.PeopleBitmap.y == tile.y) {
+            this.ifOnGoal = true;
+        }
+        else {
+            this.ifOnGoal = false;
+        }
+        return this.ifOnGoal;
+    };
+    p.PeopleAnimation = function () {
+        var idleList = ["Idle1_png", "Idle2_png", "Idle3_png", "Idle4_png", "Idle32_png"];
+        //var idleList = ["characterfront_01_png","characterfront_02_png","characterfront_03_png","characterfront_04_png"];
+        var walkRightList = ["right1_png", "right2_png", "right3_png", "right4_png"];
+        var walkLeftList = ["left1_png", "left2_png", "left3_png", "left4_png"];
+        var self = this;
+        var idleframe = 0;
+        var walkRightFrame = 0;
+        var walkLeftFrame = 0;
+        var frame = 0;
+        var Move = function () {
+            egret.Ticker.getInstance().register(function () {
+                if (frame % 4 == 0) {
+                    if (self.People.GetIdle() && !self.People.GetWalk()) {
+                        walkLeftFrame = 0;
+                        walkRightFrame = 0;
+                        var idletextureName = idleList[idleframe];
+                        var idletexture = RES.getRes(idletextureName);
+                        self.People.PeopleBitmap.texture = idletexture;
+                        idleframe++;
+                        if (idleframe >= idleList.length) {
+                            idleframe = 0;
+                        }
+                    }
+                    if (!self.People.GetIdle() && self.People.GetWalk() && self.People.GetWalkright()) {
+                        idleframe = 0;
+                        walkLeftFrame = 0;
+                        var walkrighttextureName = walkRightList[walkRightFrame];
+                        var walkrighttexture = RES.getRes(walkrighttextureName);
+                        self.People.PeopleBitmap.texture = walkrighttexture;
+                        walkRightFrame++;
+                        if (walkRightFrame >= walkRightList.length) {
+                            walkRightFrame = 0;
+                        }
+                    }
+                    if (!self.People.GetIdle() && self.People.GetWalk() && self.People.GetWalkleft()) {
+                        idleframe = 0;
+                        walkRightFrame = 0;
+                        var walklefttextureName = walkLeftList[walkLeftFrame];
+                        var walklefttexture = RES.getRes(walklefttextureName);
+                        self.People.PeopleBitmap.texture = walklefttexture;
+                        walkLeftFrame++;
+                        if (walkLeftFrame >= walkLeftList.length) {
+                            walkLeftFrame = 0;
+                        }
+                    }
+                }
+                if (self.People.PeopleBitmap.x == self.PreviousPoint.x && self.People.PeopleBitmap.y == self.PreviousPoint.y) {
+                    self.People.SetState(new PeopleIdle(), self);
+                }
+            }, self);
+        };
+        var FramaPlus = function () {
+            egret.Ticker.getInstance().register(function () {
+                frame++;
+                if (frame == 400) {
+                    frame = 0;
+                }
+            }, self);
+        };
+        Move();
+        FramaPlus();
     };
     return Main;
 }(egret.DisplayObjectContainer));

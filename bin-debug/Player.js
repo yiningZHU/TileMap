@@ -1,143 +1,150 @@
 // TypeScript file
-var Player = (function (_super) {
-    __extends(Player, _super);
+var Player = (function () {
     function Player() {
-        _super.call(this);
-        this._i = 0;
-        this.iniit();
+        this.Walkleft = false;
+        this.WalkRight = false;
+        this.PeopleBitmap = new egret.Bitmap();
+        this.PeopleBitmap.height = 32;
+        this.PeopleBitmap.width = 32;
+        this.PeopleBitmap.anchorOffsetX = this.PeopleBitmap.height / 2;
+        this.PeopleBitmap.anchorOffsetY = this.PeopleBitmap.width / 2;
+        this.ifWalk = false;
+        this.ifIdle = true;
+        this.WalkRightOrLeft = new StateMachine(); //?
+        this.WalkOrIdle = new StateMachine(); //?
     }
     var d = __define,c=Player,p=c.prototype;
-    p.iniit = function () {
-        this._people = new egret.Bitmap();
-        var _texture = RES.getRes("1_png");
-        this._people.texture = _texture;
-        this.addChild(this._people);
-        this._stateMachine = new StateMachine();
-        this._people.x = 0;
-        this._people.y = 0;
-        this._ifIdle = true;
-        this._ifWalk = false;
+    p.SetPeopleBitmap = function (peopleBitmap) {
+        this.PeopleBitmap = peopleBitmap;
     };
-    p.activate = function () {
-        this._stateMachine.setState(new PlayerIdleState(this));
+    p.SetIdle = function (If) {
+        this.ifIdle = If;
     };
-    p.move = function (targetX, targetY) {
-        egret.Tween.removeTweens(this._people);
-        if (targetX > this._people.x) {
-            this._people.skewY = 180;
-        }
-        else {
-            this._people.skewY = 0;
-        }
-        this._stateMachine.setState(new PlayerWalkState(this));
-        //egret.Tween.get(this._people).to({ x: targetX, y: targetY }, 2000).call( function(){this.idle()} ,this);
+    p.GetIdle = function () {
+        return this.ifIdle;
     };
-    p.Walk = function () {
-        var _this = this;
-        var list = ["walk1_png", "walk2_png"];
-        var count = -1;
-        egret.Ticker.getInstance().register(function () {
-            count = count + 0.2;
-            if (count >= list.length) {
-                count = 0;
-            }
-            _this._people.texture = RES.getRes(list[Math.floor(count)]);
-        }, this);
+    p.SetWalk = function (If) {
+        this.ifWalk = If;
+        console.log("Start walk");
     };
-    p.Idle = function () {
-        var _this = this;
-        var IdleList = ["Idle1_png", "Idle2_png"];
-        var count = -1;
-        egret.Ticker.getInstance().register(function () {
-            count = count + 0.06;
-            if (count >= IdleList.length) {
-                count = 0;
-            }
-            _this._people.texture = RES.getRes(IdleList[Math.floor(count)]);
-        }, this);
+    p.GetWalk = function () {
+        return this.ifWalk;
+    };
+    p.SetWslkleft = function () {
+        this.Walkleft = true;
+        this.WalkRight = false;
+        //console.log("Start walkleft");
+    };
+    p.GetWalkleft = function () {
+        return this.Walkleft;
+    };
+    p.SetWalkright = function () {
+        this.Walkleft = false;
+        this.WalkRight = true;
+        //console.log("Start walkright");
+    };
+    p.GetWalkright = function () {
+        return this.WalkRight;
+    };
+    p.creatBitmapByname = function (name) {
+        var map = new egret.Bitmap();
+        var textfield = RES.getRes(name);
+        map.texture = textfield;
+        return map;
+    };
+    p.SetState = function (e, _main) {
+        this.WalkOrIdle.setState(e, _main);
+    };
+    p.SetDirection = function (e, _main) {
+        this.WalkRightOrLeft.setState(e, _main);
     };
     return Player;
-}(egret.DisplayObjectContainer));
-egret.registerClass(Player,'Player');
-var PlayerState = (function () {
-    function PlayerState(player) {
-        this._player = player;
-    }
-    var d = __define,c=PlayerState,p=c.prototype;
-    p.onEnter = function () {
-    };
-    p.onExit = function () {
-    };
-    return PlayerState;
 }());
-egret.registerClass(PlayerState,'PlayerState',["State"]);
-var PlayerWalkState = (function (_super) {
-    __extends(PlayerWalkState, _super);
-    function PlayerWalkState() {
-        _super.apply(this, arguments);
-    }
-    var d = __define,c=PlayerWalkState,p=c.prototype;
-    p.onEnter = function () {
-        this._player._ifWalk = true;
-        this._player.Walk();
-    };
-    p.onExit = function () {
-        this._player._ifWalk = false;
-    };
-    return PlayerWalkState;
-}(PlayerState));
-egret.registerClass(PlayerWalkState,'PlayerWalkState');
-var PlayerIdleState = (function (_super) {
-    __extends(PlayerIdleState, _super);
-    function PlayerIdleState() {
-        _super.apply(this, arguments);
-    }
-    var d = __define,c=PlayerIdleState,p=c.prototype;
-    p.onEnter = function () {
-        this._player._ifIdle = true;
-        this._player.Idle();
-    };
-    p.onExit = function () {
-        this._player._ifIdle = false;
-    };
-    return PlayerIdleState;
-}(PlayerState));
-egret.registerClass(PlayerIdleState,'PlayerIdleState');
+egret.registerClass(Player,'Player');
 var StateMachine = (function () {
     function StateMachine() {
     }
     var d = __define,c=StateMachine,p=c.prototype;
-    /*
-        onRun()
-        {
-            this.CurrentState.onEnter;
+    p.setState = function (s, _main) {
+        if (this.currentState != null) {
+            this.currentState.onExit(_main);
         }
-    
-        onCheck(e: State)
-        {
-            if (this.CurrentState == e)
-            {
-                this.CurrentState = this.CurrentState;
-            }
-    
-            else
-            {
-                this.CurrentState.onExit;
-                this.CurrentState = e;
-                //return e;
-            }
-            
-        }*/
-    p.setState = function (e) {
-        if (this.CurrentState != null) {
-            this.CurrentState.onExit();
-        }
-        else {
-            this.CurrentState = e;
-        }
-        e.onEnter();
+        this.currentState = s;
+        this.currentState.onEnter(_main);
     };
     return StateMachine;
 }());
 egret.registerClass(StateMachine,'StateMachine');
+//继承State
+var PeopleState = (function () {
+    function PeopleState() {
+    }
+    var d = __define,c=PeopleState,p=c.prototype;
+    p.onEnter = function (_main) { };
+    ;
+    p.onExit = function (_main) { };
+    ;
+    return PeopleState;
+}());
+egret.registerClass(PeopleState,'PeopleState',["State"]);
+var PeopleWalk = (function () {
+    function PeopleWalk() {
+    }
+    var d = __define,c=PeopleWalk,p=c.prototype;
+    p.onEnter = function (_main) {
+        _main.People.SetWalk(true);
+        _main.People.SetIdle(false);
+    };
+    ;
+    p.onExit = function (_main) {
+        _main.People.SetWalk(false);
+    };
+    ;
+    return PeopleWalk;
+}());
+egret.registerClass(PeopleWalk,'PeopleWalk');
+var PeopleIdle = (function () {
+    function PeopleIdle() {
+    }
+    var d = __define,c=PeopleIdle,p=c.prototype;
+    p.onEnter = function (_main) {
+        _main.People.SetIdle(true);
+        _main.People.SetWalk(false);
+    };
+    ;
+    p.onExit = function (_main) {
+        _main.People.SetIdle(false);
+    };
+    ;
+    return PeopleIdle;
+}());
+egret.registerClass(PeopleIdle,'PeopleIdle');
+var PeopleWalkleftState = (function () {
+    function PeopleWalkleftState() {
+    }
+    var d = __define,c=PeopleWalkleftState,p=c.prototype;
+    p.onEnter = function (_main) {
+        _main.People.SetWslkleft();
+    };
+    ;
+    p.onExit = function (_main) {
+    };
+    ;
+    return PeopleWalkleftState;
+}());
+egret.registerClass(PeopleWalkleftState,'PeopleWalkleftState');
+var PeopleWalkrightState = (function () {
+    function PeopleWalkrightState() {
+    }
+    var d = __define,c=PeopleWalkrightState,p=c.prototype;
+    p.onEnter = function (_main) {
+        _main.People.SetWalkright();
+    };
+    ;
+    p.onExit = function (_main) {
+    };
+    ;
+    return PeopleWalkrightState;
+}());
+egret.registerClass(PeopleWalkrightState,'PeopleWalkrightState');
 //# sourceMappingURL=Player.js.map

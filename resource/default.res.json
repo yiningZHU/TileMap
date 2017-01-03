@@ -1,7 +1,7 @@
 {
 	"groups": [
 		{
-			"keys": "bg_jpg,egret_icon_png,description_json,1_png,2_png,3_png,4_png,box_jpg,road_jpg,Idle2_png,walk1_png,walk2_png,Idle1_png",
+			"keys": "bg_jpg,description_json,background_png,right1_png,right2_png,right3_png,right4_png,left1_png,left2_png,left3_png,left4_png,Idle1_png,Idle2_png,Idle3_png,Idle4_png,Idle32_png,snowMap_01_png,snowMap_02_png,snowMap_03_png,snowMap_05_png,snowMap_06_png,snowMap_07_png,snowMap_08_png,snowMap_10_png,snowMap_11_png,snowMap_13_png,snowMap_15_png,snowMap_16_png,snowMap_18_png,snowMap_20_png,snowMap_28_png,snowMap_31_png,snowMap_32_png,snowMap_14_png",
 			"name": "preload"
 		}
 	],
@@ -12,44 +12,59 @@
 			"url": "assets/bg.jpg"
 		},
 		{
-			"name": "egret_icon_png",
-			"type": "image",
-			"url": "assets/egret_icon.png"
-		},
-		{
 			"name": "description_json",
 			"type": "json",
 			"url": "config/description.json"
 		},
 		{
-			"name": "1_png",
+			"name": "background_png",
 			"type": "image",
-			"url": "assets/1.png"
+			"url": "assets/background.png"
 		},
 		{
-			"name": "2_png",
+			"name": "right1_png",
 			"type": "image",
-			"url": "assets/2.png"
+			"url": "assets/right1.png"
 		},
 		{
-			"name": "3_png",
+			"name": "right2_png",
 			"type": "image",
-			"url": "assets/3.png"
+			"url": "assets/right2.png"
 		},
 		{
-			"name": "4_png",
+			"name": "right3_png",
 			"type": "image",
-			"url": "assets/4.png"
+			"url": "assets/right3.png"
 		},
 		{
-			"name": "box_jpg",
+			"name": "right4_png",
 			"type": "image",
-			"url": "assets/box.jpg"
+			"url": "assets/right4.png"
 		},
 		{
-			"name": "road_jpg",
+			"name": "left1_png",
 			"type": "image",
-			"url": "assets/road.jpg"
+			"url": "assets/left1.png"
+		},
+		{
+			"name": "left2_png",
+			"type": "image",
+			"url": "assets/left2.png"
+		},
+		{
+			"name": "left3_png",
+			"type": "image",
+			"url": "assets/left3.png"
+		},
+		{
+			"name": "left4_png",
+			"type": "image",
+			"url": "assets/left4.png"
+		},
+		{
+			"name": "Idle1_png",
+			"type": "image",
+			"url": "assets/Idle1.png"
 		},
 		{
 			"name": "Idle2_png",
@@ -57,19 +72,109 @@
 			"url": "assets/Idle2.png"
 		},
 		{
-			"name": "walk1_png",
+			"name": "Idle3_png",
 			"type": "image",
-			"url": "assets/walk1.png"
+			"url": "assets/Idle3.png"
 		},
 		{
-			"name": "walk2_png",
+			"name": "Idle4_png",
 			"type": "image",
-			"url": "assets/walk2.png"
+			"url": "assets/Idle4.png"
 		},
 		{
-			"name": "Idle1_png",
+			"name": "Idle32_png",
 			"type": "image",
-			"url": "assets/Idle1.png"
+			"url": "assets/Idle32.png"
+		},
+		{
+			"name": "snowMap_01_png",
+			"type": "image",
+			"url": "assets/snowMap_01.png"
+		},
+		{
+			"name": "snowMap_02_png",
+			"type": "image",
+			"url": "assets/snowMap_02.png"
+		},
+		{
+			"name": "snowMap_03_png",
+			"type": "image",
+			"url": "assets/snowMap_03.png"
+		},
+		{
+			"name": "snowMap_05_png",
+			"type": "image",
+			"url": "assets/snowMap_05.png"
+		},
+		{
+			"name": "snowMap_06_png",
+			"type": "image",
+			"url": "assets/snowMap_06.png"
+		},
+		{
+			"name": "snowMap_07_png",
+			"type": "image",
+			"url": "assets/snowMap_07.png"
+		},
+		{
+			"name": "snowMap_08_png",
+			"type": "image",
+			"url": "assets/snowMap_08.png"
+		},
+		{
+			"name": "snowMap_10_png",
+			"type": "image",
+			"url": "assets/snowMap_10.png"
+		},
+		{
+			"name": "snowMap_11_png",
+			"type": "image",
+			"url": "assets/snowMap_11.png"
+		},
+		{
+			"name": "snowMap_13_png",
+			"type": "image",
+			"url": "assets/snowMap_13.png"
+		},
+		{
+			"name": "snowMap_15_png",
+			"type": "image",
+			"url": "assets/snowMap_15.png"
+		},
+		{
+			"name": "snowMap_16_png",
+			"type": "image",
+			"url": "assets/snowMap_16.png"
+		},
+		{
+			"name": "snowMap_18_png",
+			"type": "image",
+			"url": "assets/snowMap_18.png"
+		},
+		{
+			"name": "snowMap_20_png",
+			"type": "image",
+			"url": "assets/snowMap_20.png"
+		},
+		{
+			"name": "snowMap_28_png",
+			"type": "image",
+			"url": "assets/snowMap_28.png"
+		},
+		{
+			"name": "snowMap_31_png",
+			"type": "image",
+			"url": "assets/snowMap_31.png"
+		},
+		{
+			"name": "snowMap_32_png",
+			"type": "image",
+			"url": "assets/snowMap_32.png"
+		},
+		{
+			"name": "snowMap_14_png",
+			"type": "image",
+			"url": "assets/snowMap_14.png"
 		}
 	]
 }

@@ -1,192 +1,189 @@
 // TypeScript file
 
-class Player extends egret.DisplayObjectContainer
+class Player
 {
-    _people:egret.Bitmap;
-    _ifWalk:boolean;
-    _ifIdle:boolean;
-    _stateMachine:StateMachine;
-    _i:number = 0;
-
-    public constructor()
-    {
-        super();
-        this.iniit();
-        
-    }
-
-    private iniit():void
-    {
-        this._people = new egret.Bitmap();
-        var _texture:egret.Texture = RES.getRes("1_png");
-        this._people.texture = _texture;
-        this.addChild(this._people);
-        this._stateMachine = new StateMachine();
-
-        this._people.x=0;
-        this._people.y=0;
-
-        this._ifIdle = true;
-        this._ifWalk = false;
-        
-    }
-
-    public activate()
-    {
-        this._stateMachine.setState(new PlayerIdleState(this));
-    }
-
-    public move(targetX: number, targetY: number) 
-    {
-        egret.Tween.removeTweens(this._people);
-        if (targetX > this._people.x) 
-        {
-            this._people.skewY = 180;
-        }
-        else { this._people.skewY = 0; }
-
-        this._stateMachine.setState(new PlayerWalkState(this));
-
-        //egret.Tween.get(this._people).to({ x: targetX, y: targetY }, 2000).call( function(){this.idle()} ,this);
+    public PeopleBitmap:egret.Bitmap;
+    public ifWalk:boolean;
+    public ifIdle:boolean;
     
+    public Walkleft:boolean = false;
+    public WalkRight:boolean = false;
+    public WalkOrIdle : StateMachine;//?
+    public WalkRightOrLeft : StateMachine;//?
+
+    constructor()
+    {
+        this.PeopleBitmap = new egret.Bitmap();
+        this.PeopleBitmap.height = 32;
+        this.PeopleBitmap.width = 32;
+        this.PeopleBitmap.anchorOffsetX = this.PeopleBitmap.height/2;
+        this.PeopleBitmap.anchorOffsetY = this.PeopleBitmap.width/2;
+        this.ifWalk = false;
+        this.ifIdle = true;
+
+        this.WalkRightOrLeft = new StateMachine();//?
+        this.WalkOrIdle = new StateMachine();//?
+
     }
 
-    public Walk()
+    public SetPeopleBitmap(peopleBitmap:egret.Bitmap)
     {
-        var list = ["walk1_png", "walk2_png"];
-        var count = -1;
-        egret.Ticker.getInstance().register(() => {
-            count = count + 0.2;
-            if (count >= list.length) {
-                count = 0;
-            }
-            this._people.texture = RES.getRes(list[Math.floor(count)]);
-        }, this);
+        this.PeopleBitmap = peopleBitmap;
     }
 
-    public Idle()
+    public SetIdle(If:boolean)
     {
-        var IdleList = ["Idle1_png","Idle2_png"];
-        var count = -1;
-        egret.Ticker.getInstance().register(() => {
-            count = count + 0.06;
-            if (count >= IdleList.length) 
-            {
-                count = 0;
-            }
+        this.ifIdle = If;
+    }
+    public GetIdle():boolean
+    {
+        return this.ifIdle;
+    }
 
-            this._people.texture = RES.getRes(IdleList[Math.floor(count)]);
+    public SetWalk(If:boolean)
+    {
+        this.ifWalk = If;
+        console.log("Start walk");
+    }
+    public GetWalk():boolean
+    {
+        return this.ifWalk;
+    }
 
-        }, this);
+    public SetWslkleft()
+    {
+        this.Walkleft = true;
+        this.WalkRight = false;
+        //console.log("Start walkleft");
+
+    }
+    public GetWalkleft():boolean
+    {
+        return this.Walkleft;
+    }
+
+
+    public SetWalkright()
+    {
+        this.Walkleft = false;
+        this.WalkRight = true;
+         //console.log("Start walkright");
+    }
+    public GetWalkright():boolean
+    {
+        return this.WalkRight;
+    }
+
+
+
+    public creatBitmapByname(name:string):egret.Bitmap
+    {
+        var map = new egret.Bitmap();
+        var textfield:egret.Texture = RES.getRes(name);
+        map.texture = textfield;
+        return map;
+
+    }
+
+    public SetState(e:State,_main:Main)
+    {
+        this.WalkOrIdle.setState(e,_main);
+    } 
+
+    public SetDirection( e:State,_main:Main)
+    {
+        this.WalkRightOrLeft.setState(e,_main);
     }
 }
 
-interface State 
+
+//作为一个Stste接口
+interface State
 {
-    onEnter();
-    onExit();
-}
+    onEnter(_main:Main);
 
-class PlayerState implements State 
-{
-
-    _player:Player;
-
-    constructor(player: Player) 
-    {
-        this._player = player;
-    }
-
-    onEnter() 
-    {
-
-    }
-
-    onExit() 
-    {
-
-    }
-
-}
-
-
-
-class PlayerWalkState extends PlayerState 
-{
-
-    onEnter() 
-    {
-        this._player._ifWalk = true;
-  
-        this._player.Walk();
-      
-    }
-    onExit() 
-    {
-        this._player._ifWalk = false;
-    }
-
-
-}
-
-class PlayerIdleState extends PlayerState 
-{
-
-    onEnter() 
-    {
-       
-         this._player._ifIdle = true;
-         this._player.Idle();
-
-    }
-    onExit() 
-    {
-        this._player._ifIdle = false;
-    }
-
+    onExit(_main:Main);
 
 }
 
 class StateMachine 
 {
-    CurrentState: State;
-    constructor()
+    currentState: State;
+    setState( s:State , _main:Main)
     {
+      if(this.currentState != null)
+      {
+          this.currentState.onExit(_main);
+      }
+      this.currentState = s;
+      this.currentState.onEnter(_main);
 
     }
-/*
-    onRun()
+}
+
+//继承State
+class PeopleState implements State
+{
+    onEnter(_main:Main){};
+
+    onExit(_main:Main){};
+
+}
+
+
+class PeopleWalk implements PeopleState
+{
+    onEnter(_main:Main)
     {
-        this.CurrentState.onEnter;
-    }
+       _main.People.SetWalk(true);
+       _main.People.SetIdle(false);
+    };
 
-    onCheck(e: State)
+    onExit(_main:Main)
     {
-        if (this.CurrentState == e) 
-        {
-            this.CurrentState = this.CurrentState;
-        }
+        _main.People.SetWalk(false);
+    };
+}
 
-        else
-        {
-            this.CurrentState.onExit;
-            this.CurrentState = e;
-            //return e;
-        }
-        
-    }*/
-    setState(e: State) 
+class PeopleIdle implements PeopleState
+{
+    onEnter(_main:Main)
+    {
+        _main.People.SetIdle(true);
+        _main.People.SetWalk(false);
+    };
+
+    onExit(_main:Main)
+    {
+        _main.People.SetIdle(false);
+    };
+}
+
+
+class PeopleWalkleftState implements PeopleState
+{
+    onEnter(_main:Main)
+    {
+        _main.People.SetWslkleft();
+    };
+
+    onExit(_main:Main)
     {
 
-        if (this.CurrentState != null) 
-        {
-            this.CurrentState.onExit();
-        }
-        else
-        {this.CurrentState = e;}
-        e.onEnter();
-    }
+    };
 
-   
+}
+
+class PeopleWalkrightState implements PeopleState
+{
+    onEnter(_main:Main)
+    {
+        _main.People.SetWalkright();
+    };
+
+    onExit(_main:Main)
+    {
+
+    };
 
 }
